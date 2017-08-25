@@ -73,6 +73,15 @@ eventsid = {'sacc': 100,
             'blink': 300,
             }
 
+# Eye-type id
+eyetypeid = {'intra_obj': 0,
+             'trans_obj': 1,
+             'obj_bg': 2,
+             'bg_obj': 3,
+             'bg_bg': 4,
+
+             }
+
 # Dictionary containing tasks ID
 tasksid = {'Global': 0,
            'Fixation': 1,
@@ -82,7 +91,6 @@ tasksid = {'Global': 0,
            'Memory': 5
            }
 # Array of dictionaries containing image-events ID for each task
-# TODO: Check Yukako's pdf presentation to see explanation and check if this can be optimized
 imagesid = [dict() for x in range(len(tasksid))]
 imagesid[tasksid['Global']] = {'reset_trial': 0
                                }

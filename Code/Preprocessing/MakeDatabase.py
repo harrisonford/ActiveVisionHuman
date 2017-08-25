@@ -1,9 +1,34 @@
-import os
 import re
-import numpy as np
 import scipy.io as spio
 from cili.util import *
 from Code import commons as cms
+
+
+# This function loads a data file into a tuple of values for each line, splitted by a delimiter
+def file2data(_filepath, _delimiter, _noheader=True):
+    # Read data lines
+    with open(_filepath) as f:
+        data_lines = f.readlines()
+
+    # Iterate over each line and split by delimiter
+    data = []
+    for line in data_lines:
+        data.append(line.split(_delimiter))
+
+    header_indexes = []
+    current_index = 0
+    if _noheader:  # Then we eliminate header: if first item in each line is string we remove it from data until false.
+        for a_line in data:
+            # Map to string the first element of the line
+            try:
+                float(a_line[0])  # If first element is a number string then this can be done, therefore no more header
+                break
+            except ValueError:  # If string couldn't be handled as a number then it's header so we save index
+                header_indexes.append(current_index)
+                current_index += 1
+        for index in sorted(header_indexes, reverse=True):  # We pop header from last to first line
+            data.pop(index)
+    return data
 
 
 class SubjectType(object):
@@ -266,7 +291,6 @@ class OsakaSubject(SubjectType):
 class ChileSubject(SubjectType):
     # Chile notation of tags in asc file and it's conversion to OFFICIAL event tags (check commons)
     tag_dictionary = {'Imagen ploma': 'trial_start',
-                      # 'animal_solo': 'object_image_start',
                       'imagen_natural': 'main_image_start',
                       'Ruido_rosa': 'main_image_end',
                       'BLANK': 'trial_end'
@@ -297,7 +321,7 @@ class ChileSubject(SubjectType):
         for message in msgs.values:
             if len(message) == 3:
                 submessage = message[2]
-                if not isinstance(submessage, basestring):
+                if not isinstance(submessage, basestring):  # TODO: This warning is a pyCharm bug, wait for update
                     continue
                 elif 'precision' in submessage:
                     response_number = int(submessage[-1:])
@@ -373,18 +397,18 @@ class ChileSubject(SubjectType):
 
 
 # MAIN ROUTINE: Make Osaka and Chile processed database (from asc to python compatible *.dat files)
-# Chile subjects
-print "Processing Chile Subjects"
-aSubject = ChileSubject()
-filesin, filesout = aSubject.makedatabaselist('_task')
-aSubject.imageevents2dats(filesin, filesout)
-filesin, filesout = aSubject.makedatabaselist('_eye')
-aSubject.eyeevents2dats(filesin, filesout)
-
-# Osaka subjects
-print "Processing Osaka Subjects"
-aSubject = OsakaSubject()
-filesin, filesout = aSubject.makedatabaselist('_task')
-aSubject.imageevents2dats(filesin, filesout)
-filesin, filesout = aSubject.makedatabaselist('_eye')
-aSubject.eyeevents2dats(filesin, filesout)
+if __name__ == '__main__':
+    # Chile subjects
+    print "Processing Chile Subjects"
+    aSubject = ChileSubject()
+    filesin, filesout = aSubject.makedatabaselist('_task')
+    aSubject.imageevents2dats(filesin, filesout)
+    filesin, filesout = aSubject.makedatabaselist('_eye')
+    aSubject.eyeevents2dats(filesin, filesout)
+    # Osaka subjects
+    print "Processing Osaka Subjects"
+    aSubject = OsakaSubject()
+    filesin, filesout = aSubject.makedatabaselist('_task')
+    aSubject.imageevents2dats(filesin, filesout)
+    filesin, filesout = aSubject.makedatabaselist('_eye')
+    aSubject.eyeevents2dats(filesin, filesout)
